@@ -1,0 +1,44 @@
+fly( Arrive, Depart ) :-
+    flight( Depart, Arrive, time(Hour,Minute) ),
+    fullPrint( 'Depart', Depart, time(Hour,Minute) ),
+    location( Depart, DepLat, DepLong ),
+    location( Arrive, ArrLat, ArrLong ),
+    haversine(Distance, DepLat, DepLong, ArrLat, ArrLong),
+    flightTime( ArrTime, time(Hour,Minute), Distance ),
+    fullPrint( 'Arrive', Arrive, ArrTime ).
+
+flightTime( End, Start, Distance ) :-
+    End = Start.
+
+formatTime( Time ) :-
+    Time.
+
+time( Hour, Minute ) :- 
+    write( Hour ),
+    write( ':' ),
+    write( Minute ).
+
+portPrint( KeyA ) :- 
+    airport( KeyA, Fullname, degmin(Latdeg,Latmin), degmin(Longdeg,Longmin) ),
+    write( Fullname ).
+
+fullPrint( AD, Port, Time ) :-
+    write( AD ), write(' '), write( Port ), write(' '),
+    portPrint( Port ),
+    Time, nl.
+
+location( Loc, Longrad, Latrad) :-
+    airport( Loc, Fullname, degmin(Latdeg,Latmin), degmin(Longdeg,Longmin) ),
+    radian(Latrad, Latdeg, Latmin),
+    radian(Longrad, Longdeg, Longmin).
+
+radian( Rad, Deg, Min ) :-
+    Rad is (Deg+Min/60)*3.14159265/180.
+
+haversine(Return, Anorth, Awest, Bnorth, Bwest) :-
+   Dlon is Anorth - Bnorth,
+   Dlat is Awest - Bwest,
+   A is sin( Dlat / 2 ) ** 2
+      + cos( Awest ) * cos( Bwest ) * sin( Dlon / 2 ) ** 2,
+   Dist is 2 * atan2( sqrt( A ), sqrt( 1 - A )),
+   Return is round(Dist * 3961), write(Return).
